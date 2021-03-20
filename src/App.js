@@ -1,23 +1,24 @@
-import logo from './logo.svg';
+import { Switch, Route } from 'react-router-dom';
+
+import HomePage from './pages/homepage/homepage.component';
+import Header from './components/header/header.component.jsx';
+import Footer from './components/footer/footer.component';
+
 import './App.css';
+import 'semantic-ui-css/semantic.min.css'
 
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <div className="content">
+        <Header />
+        <Switch>
+          <Route exact path="/" component={HomePage} />
+          {/*<Route path="/todos/:todoId" component={} />
+    <Route path="*" component={} />*/}
+        </Switch>
+      </div>
+      <Footer />
     </div>
   );
 }
