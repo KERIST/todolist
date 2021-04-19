@@ -15,8 +15,8 @@ const AddTodoForm = ({ addItem }) => {
     }
 
     return (<AddTodoFormContainer onSubmit={(e) => {e.preventDefault(); addItem(inputValue); setInputValue('');}}>
-        <Input icon='add' iconPosition='left' placeholder='Search users...' onChange={handleInputChange} value={inputValue} />
-        <Button>Add</Button>
+        <Input icon='add' iconPosition='left' placeholder='Add todos...' onChange={handleInputChange} value={inputValue} required />
+        <Button color="blue">Add</Button>
     </AddTodoFormContainer>)
 };
 

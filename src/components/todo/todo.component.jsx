@@ -10,28 +10,28 @@ import SaveForm from '../save-form/save-form.component';
 const TodoContainer = styled.div`
     display: flex;
     flex-flow: column wrap;
-
+    align-items: center;
+    padding: 1rem;
 `;
 
 class Todo extends React.Component {
-    constructor() {
+    constructor(props) {
         super();
 
-        this.state = {items: {
-            1: {data: 'Хлеб', isDone: true},
-            2: {data: 'Молоко', isDone: false},
-            3: {data: 'Сделать дз', isDone: true},
-            4: {data: 'Пойти на улицу', isDone: false},
-            5: {data: 'Сходить в боссейн', isDone: false},
-        }, filter: ''}
+        const { items, uid } = props;
+
+        this.state = {items: items ? items : {
+            1: {data: 'Example', isDone: false},
+        }, filter: '', savedLink: uid ? uid : ''}
+
         this.changeStatus = this.changeStatus.bind(this);
         this.addItem = this.addItem.bind(this);
         this.deleteTodoItem = this.deleteTodoItem.bind(this);
         this.setFilter = this.setFilter.bind(this);
+        this.saveTodosAsync = this.saveTodosAsync.bind(this);
     }
 
     changeStatus(id) {
-        console.log(id);
         this.setState(state => {
             let items = state.items;
             return {items: {...items, [id]: {...items[id], isDone: !items[id].isDone}}}
@@ -41,12 +41,18 @@ class Todo extends React.Component {
 
     componentDidUpdate() {
         localStorage.setItem('items', JSON.stringify(this.state.items));
+        localStorage.setItem('uid', JSON.stringify(this.state.savedLink));
     }
     
     componentDidMount() {
         let savedItems = localStorage.getItem('items');
-        if(savedItems) {
+        let savedItemsUid = localStorage.getItem('uid');
+        if(savedItems && savedItemsUid) {
+            this.setState({items: JSON.parse(savedItems), savedLink: JSON.parse(savedItemsUid)});
+        } else if(savedItems) {
             this.setState({items: JSON.parse(savedItems)});
+        } else if(savedItemsUid) {
+            this.setState({savedLink: JSON.parse(savedItemsUid)});
         }
     }
 
@@ -70,19 +76,43 @@ class Todo extends React.Component {
         })
     }
 
-    saveTodosAsync(callback) {
-        // TODO: implement fetch request
+    saveTodosAsync(e) {
+        e.preventDefault();
+
+        if(this.state.savedLink) {
+            fetch('/api/todos/update', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({items: this.state.items, uid: this.state.savedLink})
+            }).then(response => {
+                if(response.status === 200) {
+                    console.log('saved');
+                }
+            })
+        } else {
+            fetch('/api/todos/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({items: this.state.items})
+            }).then(response => response.json())
+            .then(response => this.setState({savedLink: response.uid}));
+        }
+        
     }
 
     render() {
-        const { items, filter } = this.state;
+        const { items, filter, savedLink } = this.state;
 
         return (
             <TodoContainer>
                 <TodoSearch setFilter={this.setFilter} />
                 <TodoList changeStatus={this.changeStatus} items={items} deleteTodoItem={this.deleteTodoItem} filter={filter}/>
                 <AddTodoForm addItem={this.addItem} />
-                <SaveForm />
+                <SaveForm saveTodos={this.saveTodosAsync} savedLink={savedLink}/>
             </TodoContainer>
         );
     }

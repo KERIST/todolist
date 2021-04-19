@@ -1,4 +1,4 @@
-import { List, Table } from 'semantic-ui-react';
+import { Table } from 'semantic-ui-react';
 import styled from 'styled-components';
 import TodoListItem from '../todo-list-item/todo-list-item.component';
 
